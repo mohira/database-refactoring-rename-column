@@ -6,6 +6,9 @@ from click import Context
 from psycopg2._psycopg import connection
 from psycopg2.extras import DictCursor
 
+from src.adaptor.postgre_customer_repository import PostgreCustomerRepository
+from src.use_case.register_customer_use_case import RegisterCustomerUseCase
+
 
 @click.group()
 def main():
@@ -79,14 +82,11 @@ def register():
         cursor_factory=DictCursor
     )
 
-    cursor = conn.cursor()
-
-    sql = 'INSERT INTO customer (fname) VALUES (%s)'
+    repository = PostgreCustomerRepository(conn)
+    use_case = RegisterCustomerUseCase(repository)
 
     new_customer_name = input('New customer name > ')
-    cursor.execute(sql, (new_customer_name,))
-
-    conn.commit()
+    use_case.do(new_customer_name)
 
 
 @main.command()
